@@ -1,8 +1,11 @@
 import {useState} from 'react';
 import '../css/StartGame.css';
 import axios from 'axios';
+import { useNavigate } from "react-router-dom";
 
 const StartGame = () => {
+
+    let navigate = useNavigate();
 
     const [playerData, setPlayerData] = useState({
         id: "",
@@ -27,6 +30,7 @@ const StartGame = () => {
             .catch(error => {
                 console.log("error message: ",error)
             })
+        navigate(`/game/${playerData.playerName}`);
     }
 
     return (
