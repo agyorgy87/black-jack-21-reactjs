@@ -8,7 +8,6 @@ const StartGame = () => {
     let navigate = useNavigate();
 
     const [playerData, setPlayerData] = useState({
-        id: "",
         playerName: "",
         turn: 0,
         cardSum: 0,
@@ -16,21 +15,24 @@ const StartGame = () => {
     }); 
 
     const handleInputChange = (e) => {
-        const { value } = e.target;
+        const { id, value } = e.target;
         setPlayerData({
             ...playerData,
-            playerName: value
+            [id]: value
         });
     };
 
     const sendPlayerName = (e) => {
         e.preventDefault();
         axios.post("http://localhost:8080/api/game", playerData)
-            .then(response => {})
+            .then(response => {
+                navigate(`/game/${response.data.id}`);
+                
+            })
             .catch(error => {
                 console.log("error message: ",error)
             })
-        navigate(`/game/${playerData.playerName}`);
+        
     }
 
     return (
@@ -41,7 +43,7 @@ const StartGame = () => {
                     <input 
                     type="text" 
                     className="form-control" 
-                    id="nameInput"
+                    id="playerName"
                     value={playerData.playerName}
                     onChange={handleInputChange}
                     />
