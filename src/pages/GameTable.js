@@ -1,40 +1,78 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useParams } from "react-router-dom";
 import '../css/GameTable.css';
 import axios from 'axios';
+import { useContext } from 'react';
+import { GameObject } from "../context/GameObject";
 
 const GameTable = () => {
 
     let { gameId } = useParams();
 
-    const [playerData, setPlayerData] = useState([]);
+    const gameData = useContext(GameObject);
 
+    const [currentGameData, setCurrentGameData] = useState(gameData);
+    const [enemyCard, setEnemyCard] = useState(0);
+
+    /*
     useEffect(() => {
         console.log(playerData);
         axios.get(`http://localhost:8080/get-game-id/${gameId}`)
             .then(response => {
-                console.log(playerData);
-                setPlayerData(response.data)
+                //console.log(playerData);
+                setPlayerData(response.data);
+                console.log(response.data);
             })
             .catch(error => {
-                console.log("error message: ",error)
+                console.log("error message: ",error);
             })
     },[gameId])
+    */
+
+    const hitCard = () => {
+        axios.post(`http://localhost:8080/hit-card/${gameId}`)
+        .then(response => {
+            setCurrentGameData(response.data);
+            console.log(response.data);
+        })
+        .catch(error => {
+            console.log("error message: ",error);
+        })
+    }
+
+    const showEnemyCard = () => {
+        axios.get(`http://localhost:8080/show-cards/${gameId}`)
+        .then(response => {
+            setEnemyCard(response.data);
+            console.log(response.data);
+        })
+        .catch(error => {
+            console.log("error message: ",error);
+        })
+        console.log(currentGameData);
+    }
     
     return (
         <div className="d-flex justify-content-center mt-5 game-text">
             <div>
                 <div>
-                    <p>player Name: {playerData.playerName}</p>
+                    <p>player Name: {currentGameData.playerName}</p>
                 </div>
                 <div>
-                    <p>card sum: {playerData.cardSum}</p>
+                    <p>card sum: {currentGameData.cardSum}</p> <p>enemy card: {enemyCard.enemyCardSum}</p>
                 </div>
                 <div>
-                    <p>turn: {playerData.turn}</p>
+                    <p>turn: {currentGameData.turn}</p>
                 </div>
                 <div>
-                    <button>START</button>
+                    <button onClick={hitCard}>
+                        HIT
+                    </button>
+                </div>
+                <div>
+                    <button onClick={showEnemyCard}>
+                        SHOW
+                    </button>
                 </div>
             </div>
         </div>

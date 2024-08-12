@@ -2,16 +2,20 @@ import {useState} from 'react';
 import '../css/StartGame.css';
 import axios from 'axios';
 import { useNavigate } from "react-router-dom";
+import { useContext } from 'react';
+import { GameObject } from "../context/GameObject";
 
 const StartGame = () => {
 
     let navigate = useNavigate();
 
+    const gameData = useContext(GameObject);
+    
     const [playerData, setPlayerData] = useState({
         playerName: "",
         turn: 0,
         cardSum: 0,
-        finished: false
+        finished: false,
     }); 
 
     const handleInputChange = (e) => {
@@ -32,7 +36,7 @@ const StartGame = () => {
             .catch(error => {
                 console.log("error message: ",error)
             })
-        
+        gameData.setValue(playerData);
     }
 
     return (
