@@ -1,11 +1,14 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams } from "react-router-dom";
 import '../css/GameTable.css';
 import axios from 'axios';
 import { useContext } from 'react';
 import { GameObject } from "../context/GameObject";
+import { useNavigate } from "react-router-dom";
 
 const GameTable = () => {
+
+    let navigate = useNavigate();
 
     let { gameId } = useParams();
 
@@ -28,6 +31,23 @@ const GameTable = () => {
             })
     },[gameId])
     */
+    
+
+    useEffect(() => {
+        axios.get(`http://localhost:8080/get-game-id/${gameId}`)
+            .then(response => {
+                setCurrentGameData(response.data);
+            })
+            .catch(error => {
+                console.log("ez")
+                if (error.response && error.response.status === 404) {
+                    navigate("/");
+                } else {
+                    console.log("error message: ", error);
+                }
+            });
+    }, [gameId]);
+
 
     const hitCard = () => {
         axios.post(`http://localhost:8080/hit-card/${gameId}`)
