@@ -4,6 +4,7 @@ import '../css/GameTable.css';
 import axios from 'axios';
 import { useContext } from 'react';
 import { GameObject } from "../context/GameObject";
+import { DeckObject } from '../context/DeckObject';
 import { useNavigate } from "react-router-dom";
 
 const GameTable = () => {
@@ -12,9 +13,13 @@ const GameTable = () => {
 
     let { gameId } = useParams();
 
-    const gameData = useContext(GameObject);
+    const gameData = useContext(GameObject); 
+
+    const deckData = useContext(DeckObject);
 
     const [currentGameData, setCurrentGameData] = useState(gameData);
+    //const [currentDeckData, setCurrentDeckData] = useState(deckData);
+    const [sum, setSum] = useState(); // ezt kell majd megjelenitenem a sum részen
     const [enemyCard, setEnemyCard] = useState(0);
 
     /*
@@ -39,26 +44,34 @@ const GameTable = () => {
                 setCurrentGameData(response.data);
             })
             .catch(error => {
-                console.log("ez")
                 if (error.response && error.response.status === 404) {
                     navigate("/");
                 } else {
                     console.log("error message: ", error);
                 }
             });
+            console.log("useeff deck data:",deckData);
     }, [gameId]);
 
 
-    const hitCard = () => {
-        axios.post(`http://localhost:8080/hit-card/${gameId}`)
-        .then(response => {
-            setCurrentGameData(response.data);
-            console.log(response.data);
-        })
-        .catch(error => {
-            console.log("error message: ",error);
-        })
-    }
+const hitCard = () => {
+  const currentDeckId = deckData.value.deckResponseData.id;
+  const currentGameId = gameId;
+
+  const objToSend = {
+    deckId: currentDeckId,
+    gameId: currentGameId
+  };
+
+  axios.post("http://localhost:8080/game/pull-unpulled-card", objToSend)
+    .then(response => {
+      setCurrentGameData(response.data);
+      console.log("pull-unpulled-card:", response.data.cardType);
+    })
+    .catch(error => {
+      console.log("error message:", error);
+    });
+};
 
     const showEnemyCard = () => {
         axios.get(`http://localhost:8080/show-cards/${gameId}`)
@@ -75,6 +88,10 @@ const GameTable = () => {
     return (
         <div className="d-flex justify-content-center mt-5 game-text">
             <div>
+                <div>
+                    {/*<p>deck name: {deckData.value.name}</p>*/}
+                    <p>deck name: {deckData.value.deckResponseData.name}</p>
+                </div>
                 <div>
                     <p>player Name: {currentGameData.playerName}</p>
                 </div>
