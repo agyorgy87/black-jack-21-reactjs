@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useParams } from "react-router-dom";
 import '../css/GameTable.css';
 import axios from 'axios';
@@ -17,28 +17,20 @@ const GameTable = () => {
 
     const deckData = useContext(DeckObject);
 
+    const refInitialPlayerCards = useRef(false);
+
+    const refInitialDealerCards = useRef(false);
+
     const [currentGameData, setCurrentGameData] = useState(gameData);
-    //const [currentDeckData, setCurrentDeckData] = useState(deckData);
-    const [sum, setSum] = useState(); // ezt kell majd megjelenitenem a sum részen
+
     const [enemyCard, setEnemyCard] = useState(0);
 
-    /*
-    useEffect(() => {
-        console.log(playerData);
-        axios.get(`http://localhost:8080/get-game-id/${gameId}`)
-            .then(response => {
-                //console.log(playerData);
-                setPlayerData(response.data);
-                console.log(response.data);
-            })
-            .catch(error => {
-                console.log("error message: ",error);
-            })
-    },[gameId])
-    */
+    const [playerCards, setPlayerCards] = useState([]);
+
+    const [dealerCards, setDealerCards] = useState([]);
     
 
-    useEffect(() => {
+     useEffect(() => {
         axios.get(`http://localhost:8080/get-game-id/${gameId}`)
             .then(response => {
                 setCurrentGameData(response.data);
@@ -50,10 +42,39 @@ const GameTable = () => {
                     console.log("error message: ", error);
                 }
             });
-            console.log("useeff deck data:",deckData);
     }, [gameId]);
 
+    
 
+    useEffect(() => {
+        if (refInitialPlayerCards.current) return; 
+        refInitialPlayerCards.current = true;
+
+        const initialPlayerCards = async () => {
+            const firstPlayerCard = await hitCard();
+            const secondPlayerCard = await hitCard();
+            setPlayerCards([firstPlayerCard, secondPlayerCard]);
+        };
+        initialPlayerCards();
+    }, []);
+
+
+    useEffect(() => {
+        if (playerCards.length === 2 && !refInitialDealerCards.current) {
+            refInitialDealerCards.current = true;
+
+            const initialDealerCards = async () => {
+                const firstDealerCard = await hitCard();
+                const secondDealerCard = await hitCard();
+                setDealerCards([firstDealerCard, secondDealerCard]);
+        };
+        initialDealerCards();
+        }
+    }, [playerCards]);
+
+
+
+/*
 const hitCard = () => {
   const currentDeckId = deckData.value.deckResponseData.id;
   const currentGameId = gameId;
@@ -71,25 +92,40 @@ const hitCard = () => {
     .catch(error => {
       console.log("error message:", error);
     });
-};
+    };
 
     const showEnemyCard = () => {
         axios.get(`http://localhost:8080/show-cards/${gameId}`)
         .then(response => {
             setEnemyCard(response.data);
-            console.log(response.data);
         })
         .catch(error => {
             console.log("error message: ",error);
         })
-        console.log(currentGameData);
     }
-    
+*/
+
+const hitCard = async () => {
+  const objToSend = {
+    deckId: deckData.value.deckResponseData.id,
+    gameId: gameId
+  };
+
+  try {
+    const response = await axios.post("http://localhost:8080/game/pull-unpulled-card", objToSend);
+    //setCurrentGameData(response.data);
+    console.log("pull-unpulled-card:", response.data.cardType);
+    return response.data.cardType;
+  } catch (error) {
+    console.log("error message:", error);
+  }
+};
+
+
     return (
         <div className="d-flex justify-content-center mt-5 game-text">
             <div>
                 <div>
-                    {/*<p>deck name: {deckData.value.name}</p>*/}
                     <p>deck name: {deckData.value.deckResponseData.name}</p>
                 </div>
                 <div>
@@ -107,9 +143,31 @@ const hitCard = () => {
                     </button>
                 </div>
                 <div>
+                {/*
                     <button onClick={showEnemyCard}>
                         SHOW
                     </button>
+                    */}
+                </div>
+                <div className="dealer-cards">
+                    {dealerCards.map((card, index) => (
+                        <img
+                            key={index}
+                            src={`/french_cards_imgs/${card}.png`}
+                            alt={card}
+                            style={{ width: "80px", marginRight: "5px" }}
+                        />
+                    ))}
+                </div>
+                <div className="player-cards">
+                    {playerCards.map((card, index) => (
+                        <img
+                            key={index}
+                            src={`/french_cards_imgs/${card}.png`}
+                            alt={card}
+                            style={{ width: "80px", marginRight: "5px" }}
+                        />
+                    ))}
                 </div>
             </div>
         </div>
