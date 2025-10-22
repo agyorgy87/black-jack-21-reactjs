@@ -28,6 +28,8 @@ const GameTable = () => {
     const [playerCards, setPlayerCards] = useState([]);
 
     const [dealerCards, setDealerCards] = useState([]);
+
+    const [revealDealer, setRevealDealer] = useState(false);
     
 
      useEffect(() => {
@@ -105,6 +107,7 @@ const hitCard = () => {
     }
 */
 
+
 const hitCard = async () => {
   const objToSend = {
     deckId: deckData.value.deckResponseData.id,
@@ -153,7 +156,7 @@ const hitCard = async () => {
                     {dealerCards.map((card, index) => (
                         <img
                             key={index}
-                            src={`/french_cards_imgs/${card}.png`}
+                            src={index === 1 && !revealDealer ? "/french_cards_imgs/card_back.png" :`/french_cards_imgs/${card}.png`}
                             alt={card}
                             style={{ width: "80px", marginRight: "5px" }}
                         />
