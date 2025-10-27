@@ -53,8 +53,8 @@ const GameTable = () => {
         refInitialPlayerCards.current = true;
 
         const initialPlayerCards = async () => {
-            const firstPlayerCard = await hitCard();
-            const secondPlayerCard = await hitCard();
+            const firstPlayerCard = await cardDrawing();
+            const secondPlayerCard = await cardDrawing();
             setPlayerCards([firstPlayerCard, secondPlayerCard]);
         };
         initialPlayerCards();
@@ -66,8 +66,8 @@ const GameTable = () => {
             refInitialDealerCards.current = true;
 
             const initialDealerCards = async () => {
-                const firstDealerCard = await hitCard();
-                const secondDealerCard = await hitCard();
+                const firstDealerCard = await cardDrawing();
+                const secondDealerCard = await cardDrawing();
                 setDealerCards([firstDealerCard, secondDealerCard]);
         };
         initialDealerCards();
@@ -108,7 +108,7 @@ const hitCard = () => {
 */
 
 
-const hitCard = async () => {
+const cardDrawing = async () => { 
   const objToSend = {
     deckId: deckData.value.deckResponseData.id,
     gameId: gameId
@@ -122,6 +122,15 @@ const hitCard = async () => {
   } catch (error) {
     console.log("error message:", error);
   }
+};
+
+const hitCard = () => {
+  cardDrawing()
+    .then(newCard => {
+      if (!newCard) return;
+      setPlayerCards(prev => [...prev, newCard]);
+    })
+    .catch(err => console.error("error when drawing a card:", err));
 };
 
 
