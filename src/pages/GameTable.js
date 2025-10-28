@@ -23,13 +23,17 @@ const GameTable = () => {
 
     const [currentGameData, setCurrentGameData] = useState(gameData);
 
-    const [enemyCard, setEnemyCard] = useState(0);
-
     const [playerCards, setPlayerCards] = useState([]);
 
     const [dealerCards, setDealerCards] = useState([]);
 
     const [revealDealer, setRevealDealer] = useState(false);
+
+    const [playerCurrentCardPoints, setPlayerCurrentCardPoints] = useState(0);
+
+    const [dealerCurrentCardPoints, setDealerCurrentCardPoints] = useState(0);
+
+    const [bust, setBust] = useState(false);
     
 
      useEffect(() => {
@@ -58,7 +62,15 @@ const GameTable = () => {
             setPlayerCards([firstPlayerCard, secondPlayerCard]);
         };
         initialPlayerCards();
+        const totalHandPoints = handValueCouting(playerCards);
+        setPlayerCurrentCardPoints(totalHandPoints);
     }, []);
+
+
+    useEffect(() => {
+        const totalHandPoints = handValueCouting(playerCards);
+        setPlayerCurrentCardPoints(totalHandPoints);
+    }, [playerCards]);
 
 
     useEffect(() => {
@@ -72,67 +84,140 @@ const GameTable = () => {
         };
         initialDealerCards();
         }
+        
     }, [playerCards]);
 
 
-
-/*
-const hitCard = () => {
-  const currentDeckId = deckData.value.deckResponseData.id;
-  const currentGameId = gameId;
-
-  const objToSend = {
-    deckId: currentDeckId,
-    gameId: currentGameId
-  };
-
-  axios.post("http://localhost:8080/game/pull-unpulled-card", objToSend)
-    .then(response => {
-      setCurrentGameData(response.data);
-      console.log("pull-unpulled-card:", response.data.cardType);
+    useEffect(() => {
+        if(playerCurrentCardPoints > 21) {
+            setBust(true);
+        }
     })
-    .catch(error => {
-      console.log("error message:", error);
-    });
+
+
+    const handValueCouting = (cards) => {
+
+        let sum = 0;
+        let aces = 0;
+
+        for(let i = 0; i < cards.length; i++) {
+            const card = cards[i];
+            if(!card) continue;
+            const cardValue = card.split("_")[1];
+
+            if(cardValue === "A") {
+                aces += 1;
+                sum += 11;
+            } else if(["J","Q","K"].includes(cardValue)) {
+                sum += 10;
+            } else {
+                sum += parseInt(cardValue);
+            }
+        }
+
+        while (sum > 21 && aces > 0) {
+            sum -= 10;
+            aces -= 1;
+        }
+
+        return sum;
+
+    }
+
+
+    const cardDrawing = async () => { 
+        const objToSend = {
+            deckId: deckData.value.deckResponseData.id,
+            gameId: gameId
+        };
+
+        try {
+            const response = await axios.post("http://localhost:8080/game/pull-unpulled-card", objToSend);
+            //setCurrentGameData(response.data);
+            console.log("pull-unpulled-card:", response.data.cardType);
+            return response.data.cardType;
+            
+        } catch (error) {
+            console.log("error message:", error);
+        }
+
     };
 
-    const showEnemyCard = () => {
-        axios.get(`http://localhost:8080/show-cards/${gameId}`)
-        .then(response => {
-            setEnemyCard(response.data);
-        })
-        .catch(error => {
-            console.log("error message: ",error);
-        })
+
+    const hitDealerCard = async () => {
+
+        let fortunaNumber = Math.floor(Math.random() * 1000000) + 1;
+
+        const shouldDraw = dealerCurrentCardPoints < 16 || (dealerCurrentCardPoints >= 16 && dealerCurrentCardPoints < 18 && fortunaNumber > 777777);
+
+        if(!shouldDraw) return;
+
+            try {
+            const newCard = await cardDrawing();
+            if(!newCard) return;
+
+            const updatedCards = [...dealerCards, newCard];
+            const totalDealerPoints = handValueCouting(updatedCards);
+
+            setDealerCards(updatedCards)
+            setDealerCurrentCardPoints(totalDealerPoints);
+
+            console.log("Új kártya dealernek: ", newCard);
+            console.log("dealer pontszám: ", totalDealerPoints);
+
+            if (totalDealerPoints < 21) {
+            setTimeout(() => {
+                hitDealerCard();
+            }, 2000);
+        }
+
+            } catch (error) {
+            console.error("error when drawing a card: ", error);
+            }
+    }         
+
+
+    const hitCard = async () => {
+
+        try {
+            const newCard = await cardDrawing();
+            if(!newCard) return;
+
+            const updatedCards = [...playerCards, newCard];
+            const totalHandPoints = handValueCouting(updatedCards);
+
+            setPlayerCards(updatedCards);
+            setPlayerCurrentCardPoints(totalHandPoints);
+
+            console.log("Új kártya: ", newCard);
+            console.log("Játékos pontszám: ", totalHandPoints);
+
+        } catch (error) {
+            console.error("error when drawing a card: ", error);
+        }
+    };
+
+
+    const stand = () => {
+        setRevealDealer(true);
+        setTimeout(() => {
+            hitDealerCard();
+        }, 2000);   
     }
-*/
 
 
-const cardDrawing = async () => { 
-  const objToSend = {
-    deckId: deckData.value.deckResponseData.id,
-    gameId: gameId
-  };
+    /*
+    const hitCard = () => {
 
-  try {
-    const response = await axios.post("http://localhost:8080/game/pull-unpulled-card", objToSend);
-    //setCurrentGameData(response.data);
-    console.log("pull-unpulled-card:", response.data.cardType);
-    return response.data.cardType;
-  } catch (error) {
-    console.log("error message:", error);
-  }
-};
+    cardDrawing()
+        .then(newCard => {
+        if (!newCard) return;
+        setPlayerCards(prev => [...prev, newCard]);
+        })
+        .catch(err => console.error("error when drawing a card:", err));
 
-const hitCard = () => {
-  cardDrawing()
-    .then(newCard => {
-      if (!newCard) return;
-      setPlayerCards(prev => [...prev, newCard]);
-    })
-    .catch(err => console.error("error when drawing a card:", err));
-};
-
+    };
+    */
 
     return (
         <div className="d-flex justify-content-center mt-5 game-text">
@@ -144,15 +229,11 @@ const hitCard = () => {
                     <p>player Name: {currentGameData.playerName}</p>
                 </div>
                 <div>
-                    <p>card sum: {currentGameData.cardSum}</p> <p>enemy card: {enemyCard.enemyCardSum}</p>
+                    <p>Player card points: {playerCurrentCardPoints}</p> 
+                    <p>Dealer card points: {}</p>
                 </div>
                 <div>
                     <p>turn: {currentGameData.turn}</p>
-                </div>
-                <div>
-                    <button onClick={hitCard}>
-                        HIT
-                    </button>
                 </div>
                 <div>
                 {/*
@@ -167,9 +248,12 @@ const hitCard = () => {
                             key={index}
                             src={index === 1 && !revealDealer ? "/french_cards_imgs/card_back.png" :`/french_cards_imgs/${card}.png`}
                             alt={card}
-                            style={{ width: "80px", marginRight: "5px" }}
+                            style={{ width: "80px", marginRight: "-30px" }}
                         />
                     ))}
+                </div>
+                <div className="h-25">
+                    {bust ? <p>BUST</p> : null}
                 </div>
                 <div className="player-cards">
                     {playerCards.map((card, index) => (
@@ -177,9 +261,21 @@ const hitCard = () => {
                             key={index}
                             src={`/french_cards_imgs/${card}.png`}
                             alt={card}
-                            style={{ width: "80px", marginRight: "5px" }}
+                            style={{ width: "80px", marginRight: "-30px" }}
                         />
                     ))}
+                </div>
+                <div className="d-flex">
+                    <div>
+                        <button onClick={hitCard}>
+                            HIT
+                        </button>
+                    </div>
+                    <div>
+                        <button onClick={stand}>
+                            STAND
+                        </button>                   
+                    </div>
                 </div>
             </div>
         </div>
