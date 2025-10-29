@@ -92,7 +92,8 @@ const GameTable = () => {
         if(playerCurrentCardPoints > 21) {
             setBust(true);
         }
-    })
+    });
+    
 
 
     const handValueCouting = (cards) => {
@@ -126,6 +127,7 @@ const GameTable = () => {
 
 
     const cardDrawing = async () => { 
+
         const objToSend = {
             deckId: deckData.value.deckResponseData.id,
             gameId: gameId
@@ -133,7 +135,6 @@ const GameTable = () => {
 
         try {
             const response = await axios.post("http://localhost:8080/game/pull-unpulled-card", objToSend);
-            //setCurrentGameData(response.data);
             console.log("pull-unpulled-card:", response.data.cardType);
             return response.data.cardType;
             
@@ -146,9 +147,17 @@ const GameTable = () => {
 
     const hitDealerCard = async () => {
 
+        const totalDealerPointsNow = handValueCouting(dealerCards);
+        setDealerCurrentCardPoints(totalDealerPointsNow);
+
+        if(totalDealerPointsNow >= 21){
+            return;
+        }
+    
         let fortunaNumber = Math.floor(Math.random() * 1000000) + 1;
 
-        const shouldDraw = dealerCurrentCardPoints < 16 || (dealerCurrentCardPoints >= 16 && dealerCurrentCardPoints < 18 && fortunaNumber > 777777);
+        const shouldDraw = totalDealerPointsNow < 17 || 
+        (totalDealerPointsNow >= 17 && fortunaNumber > 777777);
 
         if(!shouldDraw) return;
 
@@ -156,31 +165,43 @@ const GameTable = () => {
             const newCard = await cardDrawing();
             if(!newCard) return;
 
-            const updatedCards = [...dealerCards, newCard];
-            const totalDealerPoints = handValueCouting(updatedCards);
+            setDealerCards(prevCards => {
+                const updatedCards = [...prevCards, newCard];
+                const newTotal = handValueCouting(updatedCards);
 
-            setDealerCards(updatedCards)
-            setDealerCurrentCardPoints(totalDealerPoints);
+                setDealerCurrentCardPoints(newTotal);
 
-            console.log("Új kártya dealernek: ", newCard);
-            console.log("dealer pontszám: ", totalDealerPoints);
+                console.log("Új kártya a dealernél: ", newCard);
+                console.log("dealer pontszám: ", newTotal);
 
-            if (totalDealerPoints < 21) {
-            setTimeout(() => {
-                hitDealerCard();
-            }, 2000);
-        }
+                if (newTotal >= 18) {
+                return updatedCards; 
+  }
+
+                if (newTotal < 16) {
+                    setTimeout(hitDealerCard, 2000);
+                } else if (newTotal >= 17) {
+                    let fortunaNumber = Math.floor(Math.random() * 1000000) + 1;
+                    if (fortunaNumber > 777777) {
+                    setTimeout(hitDealerCard, 2000);
+                    }
+                }
+
+                return updatedCards;
+            });          
 
             } catch (error) {
             console.error("error when drawing a card: ", error);
-            }
+            } 
     }         
 
 
     const hitCard = async () => {
 
         try {
+            await new Promise(resolve => setTimeout(resolve, 2000)); 
             const newCard = await cardDrawing();
+
             if(!newCard) return;
 
             const updatedCards = [...playerCards, newCard];
@@ -192,32 +213,27 @@ const GameTable = () => {
             console.log("Új kártya: ", newCard);
             console.log("Játékos pontszám: ", totalHandPoints);
 
-        } catch (error) {
-            console.error("error when drawing a card: ", error);
-        }
+            } catch (error) {
+                console.error("error when drawing a card: ", error);
+            }
+        
     };
 
 
     const stand = () => {
         setRevealDealer(true);
+
+        const totalDealerPoints = handValueCouting(dealerCards);
+        setDealerCurrentCardPoints(totalDealerPoints);
+
+        console.log("dealer lapok felfedve: ", dealerCards);
+        console.log("dealer jelenlegi pontszám: ", totalDealerPoints);
+
         setTimeout(() => {
             hitDealerCard();
         }, 2000);   
     }
 
-
-    /*
-    const hitCard = () => {
-
-    cardDrawing()
-        .then(newCard => {
-        if (!newCard) return;
-        setPlayerCards(prev => [...prev, newCard]);
-        })
-        .catch(err => console.error("error when drawing a card:", err));
-
-    };
-    */
 
     return (
         <div className="d-flex justify-content-center mt-5 game-text">
@@ -230,17 +246,10 @@ const GameTable = () => {
                 </div>
                 <div>
                     <p>Player card points: {playerCurrentCardPoints}</p> 
-                    <p>Dealer card points: {}</p>
+                    <p>Dealer card points: {dealerCurrentCardPoints}</p>
                 </div>
                 <div>
                     <p>turn: {currentGameData.turn}</p>
-                </div>
-                <div>
-                {/*
-                    <button onClick={showEnemyCard}>
-                        SHOW
-                    </button>
-                    */}
                 </div>
                 <div className="dealer-cards">
                     {dealerCards.map((card, index) => (
