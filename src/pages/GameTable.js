@@ -281,7 +281,7 @@ const GameTable = () => {
                         </button>
                     </div>
                     <div>
-                        <button onClick={stand}>
+                        <button onClick={stand} disabled={bust}>
                             STAND
                         </button>                   
                     </div>
