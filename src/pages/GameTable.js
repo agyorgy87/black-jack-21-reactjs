@@ -33,8 +33,8 @@ const GameTable = () => {
 
     const [dealerCurrentCardPoints, setDealerCurrentCardPoints] = useState(0);
 
-    const [bust, setBust] = useState(false);
-    
+    const [playerCurrentCardPointsTwenty, setPlayerCurrentCardPointsTwenty] = useState(false);
+
 
      useEffect(() => {
         axios.get(`http://localhost:8080/get-game-id/${gameId}`)
@@ -50,7 +50,6 @@ const GameTable = () => {
             });
     }, [gameId]);
 
-    
 
     useEffect(() => {
         if (refInitialPlayerCards.current) return; 
@@ -84,17 +83,25 @@ const GameTable = () => {
         };
         initialDealerCards();
         }
-        
     }, [playerCards]);
 
 
     useEffect(() => {
         if(playerCurrentCardPoints > 21) {
-            setBust(true);
+            setTimeout(() => {
+                turnResult();
+            }, 2000);
         }
-    });
-    
+    }, [playerCurrentCardPoints]);
 
+
+    useEffect(() => {
+        if(playerCurrentCardPoints === 20) {
+            setPlayerCurrentCardPointsTwenty(true);
+        }
+        //working???
+    }, [playerCurrentCardPointsTwenty]);
+    
 
     const handValueCouting = (cards) => {
 
@@ -120,9 +127,7 @@ const GameTable = () => {
             sum -= 10;
             aces -= 1;
         }
-
         return sum;
-
     }
 
 
@@ -150,7 +155,8 @@ const GameTable = () => {
         const totalDealerPointsNow = handValueCouting(dealerCards);
         setDealerCurrentCardPoints(totalDealerPointsNow);
 
-        if(totalDealerPointsNow >= 21){
+        if(totalDealerPointsNow >= 18){
+            turnResult();
             return;
         }
     
@@ -175,17 +181,19 @@ const GameTable = () => {
                 console.log("dealer pontszám: ", newTotal);
 
                 if (newTotal >= 18) {
-                return updatedCards; 
-  }
-
-                if (newTotal < 16) {
-                    setTimeout(hitDealerCard, 2000);
-                } else if (newTotal >= 17) {
-                    let fortunaNumber = Math.floor(Math.random() * 1000000) + 1;
-                    if (fortunaNumber > 777777) {
-                    setTimeout(hitDealerCard, 2000);
-                    }
+                    turnResult();
+                    return updatedCards;              
                 }
+
+                let fortunaNumber2 = Math.floor(Math.random() * 1000000) + 1;
+                if(newTotal < 17 || (newTotal === 17 && fortunaNumber2 > 777777)) {
+                    setTimeout(hitDealerCard, 2000);
+                } else {
+                    setTimeout(() => {
+                        turnResult();
+                    }, 2000);
+                }
+
 
                 return updatedCards;
             });          
@@ -235,6 +243,22 @@ const GameTable = () => {
     }
 
 
+    const turnResult = () => {
+        console.log("hello szia vége a körnek.");
+    }
+    
+/*
+    const whoIsTheWinner = () => {
+
+        if(playerBust == true) {
+            console.log("dealer win");
+        } else if(playerCurrentCardPoints == 21 && (dealerCurrentCardPoints < 21 || dealerCurrentCardPoints > 21) ) {
+            console.log("player black jack!")
+        } else if()
+
+    }
+*/
+
     return (
         <div className="d-flex justify-content-center mt-5 game-text">
             <div>
@@ -261,9 +285,6 @@ const GameTable = () => {
                         />
                     ))}
                 </div>
-                <div className="h-25">
-                    {bust ? <p>BUST</p> : null}
-                </div>
                 <div className="player-cards">
                     {playerCards.map((card, index) => (
                         <img
@@ -276,14 +297,25 @@ const GameTable = () => {
                 </div>
                 <div className="d-flex">
                     <div>
-                        <button onClick={hitCard}>
+                        <button onClick={hitCard} disabled={playerCurrentCardPointsTwenty}>
                             HIT
                         </button>
                     </div>
                     <div>
-                        <button onClick={stand} disabled={bust}>
+                        <button onClick={stand} disabled={playerCurrentCardPointsTwenty}>
                             STAND
                         </button>                   
+                    </div>
+                </div>
+                <div>
+                    <div className="coin text-center pt-3">
+                        20
+                    </div>
+                    <div className="coin text-center pt-3">
+                        50
+                    </div>
+                    <div className="coin text-center pt-3">
+                        100
                     </div>
                 </div>
             </div>
