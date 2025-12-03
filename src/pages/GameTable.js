@@ -98,7 +98,7 @@ const GameTable = () => {
     }, [playerCurrentCardPoints]);
 
 
-    useEffect(() => {//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    useEffect(() => {
         if(playerCurrentCardPoints > 20) {
             setPlayerCurrentCardPointsTwenty(true);
             stand();
