@@ -36,7 +36,9 @@ const GameTable = () => {
 
     const [dealerCurrentCardPoints, setDealerCurrentCardPoints] = useState(0);
 
-    const [playerCurrentCardPointsTwenty, setPlayerCurrentCardPointsTwenty] = useState(false);
+    const [playerCurrentCardPointsTwentyOne, setPlayerCurrentCardPointsTwentyOne] = useState(false);
+
+    const [turnResultText, setTurnResultText] = useState("");
 
 
      useEffect(() => {
@@ -100,7 +102,7 @@ const GameTable = () => {
 
     useEffect(() => {
         if(playerCurrentCardPoints > 20) {
-            setPlayerCurrentCardPointsTwenty(true);
+            setPlayerCurrentCardPointsTwentyOne(true);
             stand();
         }
     }, [playerCurrentCardPoints]);
@@ -245,22 +247,19 @@ const GameTable = () => {
         }, 2000);   
     }
 
+    const turnResult = (playerCurrentCardPoints,dealerCurrentCardPoints) => {
 
-    const turnResult = () => {
-        
+        const gamePoints = {
+            playerPoint: playerCurrentCardPoints,
+            dealerPoint: dealerCurrentCardPoints
+        };
+
+        axios.post("http://localhost:8080/turn-result", gamePoints)
+        .then(response => {
+            setTurnResultText(response.data)})
+        .catch(error => console.log("error:", error))
     }
     
-/*
-    const whoIsTheWinner = () => {
-
-        if(playerBust == true) {
-            console.log("dealer win");
-        } else if(playerCurrentCardPoints == 21 && (dealerCurrentCardPoints < 21 || dealerCurrentCardPoints > 21) ) {
-            console.log("player black jack!")
-        } else if()
-
-    }
-*/
 
     return (
         <div className="d-flex justify-content-center mt-5 game-text">
@@ -288,6 +287,9 @@ const GameTable = () => {
                         />
                     ))}
                 </div>
+                <div>
+                    <p>{turnResultText}</p>
+                </div>
                 <div className="player-cards">
                     {playerCards.map((card, index) => (
                         <img
@@ -300,12 +302,12 @@ const GameTable = () => {
                 </div>
                 <div className="d-flex">
                     <div>
-                        <button onClick={hitCard} disabled={playerCurrentCardPointsTwenty}>
+                        <button onClick={hitCard} disabled={playerCurrentCardPointsTwentyOne}>
                             HIT
                         </button>
                     </div>
                     <div>
-                        <button onClick={stand} disabled={playerCurrentCardPointsTwenty}>
+                        <button onClick={stand} disabled={playerCurrentCardPointsTwentyOne}>
                             STAND
                         </button>                   
                     </div>
