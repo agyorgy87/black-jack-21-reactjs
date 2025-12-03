@@ -6,6 +6,9 @@ import { useContext } from 'react';
 import { GameObject } from "../context/GameObject";
 import { DeckObject } from '../context/DeckObject';
 import { useNavigate } from "react-router-dom";
+import cointTen from "../chips/10.png";
+import cointTwentyfive from "../chips/25.png";
+import cointFifty from "../chips/50.png";
 
 const GameTable = () => {
 
@@ -95,12 +98,12 @@ const GameTable = () => {
     }, [playerCurrentCardPoints]);
 
 
-    useEffect(() => {
-        if(playerCurrentCardPoints === 20) {
+    useEffect(() => {//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        if(playerCurrentCardPoints > 20) {
             setPlayerCurrentCardPointsTwenty(true);
+            stand();
         }
-        //working???
-    }, [playerCurrentCardPointsTwenty]);
+    }, [playerCurrentCardPoints]);
     
 
     const handValueCouting = (cards) => {
@@ -244,7 +247,7 @@ const GameTable = () => {
 
 
     const turnResult = () => {
-        console.log("hello szia vége a körnek.");
+        
     }
     
 /*
@@ -275,7 +278,7 @@ const GameTable = () => {
                 <div>
                     <p>turn: {currentGameData.turn}</p>
                 </div>
-                <div className="dealer-cards">
+                <div className="dealer-cards mb-5">
                     {dealerCards.map((card, index) => (
                         <img
                             key={index}
@@ -307,15 +310,15 @@ const GameTable = () => {
                         </button>                   
                     </div>
                 </div>
-                <div>
-                    <div className="coin text-center pt-3">
-                        20
+                <div className="d-flex">
+                    <div>
+                        <img src={cointTen} alt="ten" className="coin me-2"/>
                     </div>
-                    <div className="coin text-center pt-3">
-                        50
+                    <div>
+                        <img src={cointTwentyfive} alt="twenty-five" className="coin me-2"/>
                     </div>
-                    <div className="coin text-center pt-3">
-                        100
+                    <div>
+                        <img src={cointFifty} alt="fifty" className="coin me-2"/>
                     </div>
                 </div>
             </div>
