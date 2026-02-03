@@ -2,6 +2,76 @@
     color: #FFF;
 }
 
+.dealer-card-points-container {
+  height: 30px;
+}
+
+.dealer-card-points-frame {
+  height: 28px;
+  width: 28px;
+  border-radius: 5px;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+}
+
+.turn-result-text-container {
+  height: 30px;
+  font-size: 20px;
+}
+
+.player-card-points-container {
+  height: 30px;
+}
+
+.player-card-points-frame {
+  height: 28px;
+  width: 28px;
+  border-radius: 5px;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+}
+
+.hit-button {
+  border-radius: 5px;
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+.pokerchip{
+  margin:.5em;
+  font-size:1.2em;
+  position:relative;
+  display:inline-block;
+  -webkit-box-sizing:border-box;
+  -moz-box-sizing:border-box;
+  box-sizing:border-box;
+  width:5em;
+  height:5em;
+  background:#555;
+  border-radius:50%;
+  position:relative;
+  border:.5em dashed white;
+  transition:all .5s ease;
+  backface-visibility:hidden;
+}
+
+.pokerchip.red{
+  background:#DD4631;
+}
+
+.pokerchip.blue{
+  background:#317DDD;
+}
+
+.pokerchip.flat{
+  box-shadow:0 0 0 .2em #fff;
+}
+
+.pokerchip.flat:hover{
+  transform:rotate(90deg);
+}
+
 .coin{
   margin-top:30px;
   height:75px;
@@ -12,3 +82,6 @@
   display: inline-block;
   cursor: pointer
 }
+
+
+

@@ -90,9 +90,9 @@ const StartGame = () => {
                 <div className="d-flex justify-content-center mt-3">
                     <button 
                     type="button" 
-                    className="btn btn-secondary"
+                    className="btn btn-dark"
                     onClick={sendAllData}>
-                        Start Game
+                        Start
                     </button>
                 </div>
             </div>

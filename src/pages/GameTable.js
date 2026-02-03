@@ -6,9 +6,6 @@ import { useContext } from 'react';
 import { GameObject } from "../context/GameObject";
 import { DeckObject } from '../context/DeckObject';
 import { useNavigate } from "react-router-dom";
-import cointTen from "../chips/10.png";
-import cointTwentyfive from "../chips/25.png";
-import cointFifty from "../chips/50.png";
 
 const GameTable = () => {
 
@@ -39,6 +36,10 @@ const GameTable = () => {
     const [playerCurrentCardPointsTwentyOne, setPlayerCurrentCardPointsTwentyOne] = useState(false);
 
     const [turnResultText, setTurnResultText] = useState("");
+
+    const [playerCoin, setPlayerCoin] = useState(300);
+
+    const [coinToBet, setCoinToBet] = useState(0);
 
 
      useEffect(() => {
@@ -94,8 +95,8 @@ const GameTable = () => {
     useEffect(() => {
         if(playerCurrentCardPoints > 21) {
             setTimeout(() => {
-                turnResult();
-            }, 2000);
+                turnResult(playerCurrentCardPoints, dealerCurrentCardPoints);
+            }, 1000);
         }
     }, [playerCurrentCardPoints]);
 
@@ -161,7 +162,7 @@ const GameTable = () => {
         setDealerCurrentCardPoints(totalDealerPointsNow);
 
         if(totalDealerPointsNow >= 18){
-            turnResult();
+            turnResult(playerCurrentCardPoints, dealerCurrentCardPoints);
             return;
         }
     
@@ -186,7 +187,7 @@ const GameTable = () => {
                 console.log("dealer pontszám: ", newTotal);
 
                 if (newTotal >= 18) {
-                    turnResult();
+                    turnResult(playerCurrentCardPoints, newTotal);
                     return updatedCards;              
                 }
 
@@ -195,7 +196,7 @@ const GameTable = () => {
                     setTimeout(hitDealerCard, 2000);
                 } else {
                     setTimeout(() => {
-                        turnResult();
+                        turnResult(playerCurrentCardPoints, newTotal);
                     }, 2000);
                 }
 
@@ -243,8 +244,16 @@ const GameTable = () => {
         console.log("dealer jelenlegi pontszám: ", totalDealerPoints);
 
         setTimeout(() => {
-            hitDealerCard();
-        }, 2000);   
+            hitDealerCard(totalDealerPoints);
+        }, 1000);   
+    }
+
+    const coinClick = (coin) => {
+        setCoinToBet(coin);
+    }
+
+    const betCoin = () => {
+        
     }
 
     const turnResult = (playerCurrentCardPoints,dealerCurrentCardPoints) => {
@@ -253,6 +262,9 @@ const GameTable = () => {
             playerPoint: playerCurrentCardPoints,
             dealerPoint: dealerCurrentCardPoints
         };
+
+        console.log("Sending to backend:", gamePoints);
+
 
         axios.post("http://localhost:8080/turn-result", gamePoints)
         .then(response => {
@@ -265,62 +277,83 @@ const GameTable = () => {
         <div className="d-flex justify-content-center mt-5 game-text">
             <div>
                 <div>
-                    <p>deck name: {deckData.value.deckResponseData.name}</p>
+                    <p>Deck name: {deckData.value.deckResponseData.name}</p>
                 </div>
-                <div>
-                    <p>player Name: {currentGameData.playerName}</p>
-                </div>
-                <div>
-                    <p>Player card points: {playerCurrentCardPoints}</p> 
-                    <p>Dealer card points: {dealerCurrentCardPoints}</p>
-                </div>
-                <div>
-                    <p>turn: {currentGameData.turn}</p>
-                </div>
-                <div className="dealer-cards mb-5">
+                <div className="mb-3">
                     {dealerCards.map((card, index) => (
                         <img
                             key={index}
-                            src={index === 1 && !revealDealer ? "/french_cards_imgs/card_back.png" :`/french_cards_imgs/${card}.png`}
+                            src={index === 1 && !revealDealer ? "/french_cards_png/back.png" :`/french_cards_png/${card}.png`}
                             alt={card}
                             style={{ width: "80px", marginRight: "-30px" }}
                         />
-                    ))}
+                    ))}-
                 </div>
-                <div>
+                <div className="dealer-card-points-container mb-2">
+                    <div className="dealer-card-points-frame">
+                        {dealerCurrentCardPoints === 0 ? "?" : dealerCurrentCardPoints}
+                    </div>           
+                </div>
+                <div className="turn-result-text-container mb-2">
                     <p>{turnResultText}</p>
+                </div>                 
+                <div className="player-card-points-container mb-2">
+                    <div>
+                        <p className="player-card-points-frame">{playerCurrentCardPoints}</p>
+                    </div>                     
                 </div>
-                <div className="player-cards">
+                <div className="player-cards mb-3">
                     {playerCards.map((card, index) => (
                         <img
                             key={index}
-                            src={`/french_cards_imgs/${card}.png`}
+                            src={`/french_cards_png/${card}.png`}
                             alt={card}
                             style={{ width: "80px", marginRight: "-30px" }}
                         />
                     ))}
                 </div>
                 <div className="d-flex">
-                    <div>
-                        <button onClick={hitCard} disabled={playerCurrentCardPointsTwentyOne}>
-                            HIT
-                        </button>
-                    </div>
+                    
                     <div>
                         <button onClick={stand} disabled={playerCurrentCardPointsTwentyOne}>
                             STAND
                         </button>                   
+                    </div>   
+                    <div>
+                        <button>
+                            DOUBLE
+                        </button>
+                    </div> 
+                    <div>
+                        <button 
+                        className="hit-button" 
+                        onClick={hitCard} 
+                        disabled={playerCurrentCardPointsTwentyOne}>
+                            HIT
+                        </button>
+                    </div> 
+                </div>
+                <div>                 
+                    {/*
+                    <div>
+                    {betCoin === 0 ? null : <p>Bet: {betCoin}</p>}
                     </div>
+                    */}
+                </div>
+                <div>
+                    <div className="pokerchip flat" onClick={() => coinClick(10)}>10</div>
+                    <div className="pokerchip flat red" onClick={() => coinClick(25)}>20</div>
+                    <div className="pokerchip flat blue" onClick={() => coinClick(50)}>30</div>
                 </div>
                 <div className="d-flex">
-                    <div>
-                        <img src={cointTen} alt="ten" className="coin me-2"/>
+                    <div className="me-3">
+                        <p>{currentGameData.playerName}</p>
+                    </div>
+                    <div className="me-3">
+                        <p>{playerCoin} coin</p>
                     </div>
                     <div>
-                        <img src={cointTwentyfive} alt="twenty-five" className="coin me-2"/>
-                    </div>
-                    <div>
-                        <img src={cointFifty} alt="fifty" className="coin me-2"/>
+                        <p>turn: {currentGameData.turn}</p>
                     </div>
                 </div>
             </div>
