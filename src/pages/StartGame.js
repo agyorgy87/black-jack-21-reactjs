@@ -81,7 +81,7 @@ const StartGame = () => {
                     <label htmlFor="nameInput" className="form-label enter-your-name-label">Enter your name:</label>
                     <input 
                     type="text" 
-                    className="form-control" 
+                    className="form-control name-input" 
                     id="playerName"
                     value={playerData.playerName}
                     onChange={handleInputChange}
@@ -90,7 +90,7 @@ const StartGame = () => {
                 <div className="d-flex justify-content-center mt-3">
                     <button 
                     type="button" 
-                    className="btn btn-dark"
+                    className="btn btn-dark start-button"
                     onClick={sendAllData}>
                         Start
                     </button>

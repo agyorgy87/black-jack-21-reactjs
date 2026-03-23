@@ -33,49 +33,73 @@
   justify-content: center;
 }
 
+.stand-button {
+  border-radius: 5px;
+  border: none;
+  background-color: #c13e3e;
+  color: #fff;
+}
+
+.double-button {
+  border-radius: 5px;
+  border: none;
+  background-color: #0088cf;
+  color: #fff;
+}
+
 .hit-button {
   border-radius: 5px;
-  background-color: rgba(0, 0, 0, 0.5);
+  border: none;
+  background-color: #00854e;
+  color: #fff;
 }
 
 .pokerchip{
-  margin:.5em;
+  margin:0.5em;
   font-size:1.2em;
   position:relative;
   display:inline-block;
   -webkit-box-sizing:border-box;
   -moz-box-sizing:border-box;
   box-sizing:border-box;
-  width:5em;
-  height:5em;
-  background:#555;
+  width:3.5em;
+  height:3.5em;
+  background:#FFCD38;
   border-radius:50%;
   position:relative;
   border:.5em dashed white;
   transition:all .5s ease;
   backface-visibility:hidden;
+  color: #fff;
+  cursor: pointer;
+}
+
+.set-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .pokerchip.red{
-  background:#DD4631;
+  background:#B01E68;
 }
 
 .pokerchip.blue{
-  background:#317DDD;
+  background:#F49D1A;
 }
 
 .pokerchip.flat{
   box-shadow:0 0 0 .2em #fff;
 }
-
+/*
 .pokerchip.flat:hover{
   transform:rotate(90deg);
 }
-
+*/
 .coin{
   margin-top:30px;
-  height:75px;
-  width:75px;
+  height:50px;
+  width:50px;
   background-color:black;
   color: black;
   border-radius: 50%;

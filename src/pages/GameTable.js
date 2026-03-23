@@ -41,8 +41,31 @@ const GameTable = () => {
 
     const [coinToBet, setCoinToBet] = useState(0);
 
+    const [clearButtonDisabled, setClearButtonDisabled] = useState(true);
 
-     useEffect(() => {
+    const [dealButtonDisabled, setDealButtonDisabled] = useState(true);
+/*
+    useEffect(() => {
+        if(turnResultText !== ""){
+            setTimeout(() => {
+                const deckResponse = axios.post("http://localhost:8080/deck/create");
+                const deckResponseData = deckResponse.data;
+                deckData.setValue({ deckResponseData });
+            }, 2000); 
+        }
+    },[turnResultText])
+*/
+
+    useEffect(()=> {
+        if(turnResultText !== ""){
+            setClearButtonDisabled(false);
+            setDealButtonDisabled(false);
+        }
+
+    }, [turnResultText]);
+
+
+    useEffect(() => {
         axios.get(`http://localhost:8080/get-game-id/${gameId}`)
             .then(response => {
                 setCurrentGameData(response.data);
@@ -256,6 +279,37 @@ const GameTable = () => {
         
     }
 
+    const startNewRound = async () => {
+    try {
+        const deckResponse = await axios.post("http://localhost:8080/deck/create");
+        const deckResponseData = deckResponse.data;
+
+        deckData.setValue({ deckResponseData });
+
+        // reset state
+        setPlayerCards([]);
+        setDealerCards([]);
+        setPlayerCurrentCardPoints(0);
+        setDealerCurrentCardPoints(0);
+        setPlayerCurrentCardPointsTwentyOne(false);
+        setRevealDealer(false);
+        setTurnResultText("");
+
+        // új lapok
+        const PlayerFirstCard = await cardDrawing();
+        const PlayerSecondCard = await cardDrawing();
+
+        setPlayerCards([PlayerFirstCard, PlayerSecondCard]);
+
+        const DealerFirstCard = await cardDrawing();
+        const DealerSecondCard = await cardDrawing();
+
+        setDealerCards([DealerFirstCard,DealerSecondCard]);
+    } catch (error) {
+        console.log(error);
+    }
+};
+
     const turnResult = (playerCurrentCardPoints,dealerCurrentCardPoints) => {
 
         const gamePoints = {
@@ -272,20 +326,20 @@ const GameTable = () => {
         .catch(error => console.log("error:", error))
     }
     
+    const alert = () => {
+        console.log("műkszik");
+    }
 
     return (
         <div className="d-flex justify-content-center mt-5 game-text">
             <div>
-                <div>
-                    <p>Deck name: {deckData.value.deckResponseData.name}</p>
-                </div>
                 <div className="mb-3">
                     {dealerCards.map((card, index) => (
                         <img
                             key={index}
                             src={index === 1 && !revealDealer ? "/french_cards_png/back.png" :`/french_cards_png/${card}.png`}
                             alt={card}
-                            style={{ width: "80px", marginRight: "-30px" }}
+                            style={{ width: "80px", marginRight: "-55px" }}
                         />
                     ))}-
                 </div>
@@ -295,7 +349,18 @@ const GameTable = () => {
                     </div>           
                 </div>
                 <div className="turn-result-text-container mb-2">
-                    <p>{turnResultText}</p>
+                    <div className="d-flex">      
+                        <div>
+                            <p>{turnResultText}</p>
+                        </div>
+                        <div>
+                            {turnResultText && (
+                            <button onClick={startNewRound}>
+                                NEW ROUND
+                            </button>
+                            )}
+                        </div>
+                    </div>    
                 </div>                 
                 <div className="player-card-points-container mb-2">
                     <div>
@@ -308,19 +373,22 @@ const GameTable = () => {
                             key={index}
                             src={`/french_cards_png/${card}.png`}
                             alt={card}
-                            style={{ width: "80px", marginRight: "-30px" }}
+                            style={{ width: "80px", marginRight: "-55px" }}
                         />
                     ))}
                 </div>
                 <div className="d-flex">
                     
                     <div>
-                        <button onClick={stand} disabled={playerCurrentCardPointsTwentyOne}>
+                        <button 
+                        className="stand-button me-3"
+                        onClick={stand} 
+                        disabled={playerCurrentCardPointsTwentyOne}>
                             STAND
                         </button>                   
                     </div>   
                     <div>
-                        <button>
+                        <button className="double-button me-3">
                             DOUBLE
                         </button>
                     </div> 
@@ -340,10 +408,22 @@ const GameTable = () => {
                     </div>
                     */}
                 </div>
-                <div>
-                    <div className="pokerchip flat" onClick={() => coinClick(10)}>10</div>
-                    <div className="pokerchip flat red" onClick={() => coinClick(25)}>20</div>
-                    <div className="pokerchip flat blue" onClick={() => coinClick(50)}>30</div>
+                <div className="d-flex">
+                    <button className="pokerchip flat set-center" onClick={() => coinClick(10)}>
+                        <div>
+                            5
+                        </div>    
+                    </button>
+                    <button className="pokerchip flat red set-center" onClick={() => coinClick(25)}>
+                        <div>
+                            10
+                        </div>
+                    </button>
+                    <button className="pokerchip flat blue set-center" onClick={() => coinClick(50)}>
+                        <div>
+                            50
+                        </div>
+                    </button>
                 </div>
                 <div className="d-flex">
                     <div className="me-3">
